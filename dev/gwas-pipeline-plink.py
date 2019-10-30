@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #------------------------------------------------------------------
 # Pipeline to run GWAS using pling for a input genotype and phenotype
+# r1.0: Running basic gwas out of the VM
 # r0.1: Python modules with many confused input parameters
 #       It works only for the original example
 #------------------------------------------------------------------
