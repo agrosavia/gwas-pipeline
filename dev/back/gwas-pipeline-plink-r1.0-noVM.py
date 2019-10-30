@@ -8,7 +8,6 @@ import sys, os
 
 args = sys.argv
 
-#args = ["","atwell2010_geno-20.ped", "atwell2010_geno.map", "atwell2010_ftfield.txt", "out"]
 args = ["","atwell2010_geno.ped", "atwell2010_geno.map", "atwell2010_ftfield.txt", "out"]
 
 GENOTYPE  = args [1]
@@ -16,8 +15,8 @@ SNPSMAP   = args [2]
 PHENOTYPE = args [3]
 OUTDIR    = args [4]
 
+#MAXPCS    = 16
 MAXPCS    = 3
-#MAXPCS    = 3
 
 # Script to run recoding from PLINK plain text to binary file format
 
@@ -35,12 +34,12 @@ MAXPCS    = 3
 #----------------------------------------------------------
 #----------------------------------------------------------
 def main ():
-
     (inGenotype, binaryGenotype) = encodeGenotypeToBinaryFormat (GENOTYPE)
     print "\n>>>", inGenotype, binaryGenotype
 
     filteredGenotype = preprocessGenotype (binaryGenotype)
     print "\n>>>", filteredGenotype
+
 
     # Population Structure Correction
     outEigensoft = calculatePCs (filteredGenotype, MAXPCS)
@@ -49,7 +48,6 @@ def main ():
     outFileEigenvec = createCovariatesFromPCs (filteredGenotype, outEigensoft)
     print "\n>>>", outFileEigenvec
 
-"""
     smallestInflation, outPCsPhenotype =  searchLeadingNumberOfPCs (filteredGenotype, PHENOTYPE, outFileEigenvec, MAXPCS, outEigensoft)
     print "\n>>>", smallestInflation, outPCsPhenotype
     
@@ -59,7 +57,6 @@ def main ():
 
     outManhattan, outQQ = plotResultsUniGWAS (outGWAS)
     print "\n>>>", outManhattan, outQQ
-"""
 
 #----------------------------------------------------------
 # Plot results Univariate GWAS with population structure correction
@@ -79,7 +76,7 @@ def plotResultsUniGWAS (outGWAS):
     execCommand (cmdMnhPlot, "Manhattan plot...")
 
     # QQ plot
-    qq_cmdl    = "/home/gwasuser/tools/cmdl_wrappers/qq_cmdl"
+    qq_cmdl    = "qq_cmdl"
     outQQ      = "%s_%s" % (outGWAS, "qq.png")
     inMethod   = "plink" 
     inLogfile  = "%s.log" % (outGWAS)
@@ -101,7 +98,7 @@ def runUnivariateGWASWithPopulationCorrection (smallestInflation, filteredGenoty
     outGWAS      = "%s_%s_pcs" % (outPCsPhenotype, smallestInflation)
 
     msg = "Univariate GWAS with PCs to correct for population structure"
-    cmdStrPC2 = "plink --bfile %s --out %s --pheno %s --linear --covar %s --covar-number 1-%s --allow-no-sex --adjust --hide-covar" 
+    cmdStrPC2 = "plink  --bfile %s --out %s --pheno %s --linear --covar %s --covar-number 1-%s --allow-no-sex --adjust --hide-covar" 
     cmd = cmdStrPC2 % (inGenotype, outGWAS, inPhenotype, inCovariates, smallestInflation)
     execCommand (cmd, msg)
 
@@ -122,9 +119,9 @@ def searchLeadingNumberOfPCs (filteredGenotype, PHENOTYPE, outFileEigenvec, MAXP
     outPCsPhenotype = outEigensoft + "_" + namePhenotype
 
     mp = 0
-    cmdStrPC0 = "plink --bfile %s --out %s_%s_pcs --pheno %s --linear --allow-no-sex --adjust --hide-covar" 
-    cmdStrPC1 = "plink --bfile %s --out %s_%s_pcs --pheno %s --linear --covar %s --covar-number 1 --allow-no-sex --adjust --hide-covar" 
-    cmdStrPC2 = "plink --bfile %s --out %s_%s_pcs --pheno %s --linear --covar %s --covar-number 1-%s --allow-no-sex --adjust --hide-covar" 
+    cmdStrPC0 = "plink  --bfile %s --out %s_%s_pcs --pheno %s --linear --allow-no-sex --adjust --hide-covar" 
+    cmdStrPC1 = "plink  --bfile %s --out %s_%s_pcs --pheno %s --linear --covar %s --covar-number 1 --allow-no-sex --adjust --hide-covar" 
+    cmdStrPC2 = "plink  --bfile %s --out %s_%s_pcs --pheno %s --linear --covar %s --covar-number 1-%s --allow-no-sex --adjust --hide-covar" 
 
     logFilesList = []
     for mp in range (MAXPCS):
@@ -154,11 +151,12 @@ def searchLeadingNumberOfPCs (filteredGenotype, PHENOTYPE, outFileEigenvec, MAXP
 #----------------------------------------------------------
 def createCovariatesFromPCs (filteredGenotype, outEigensoft):
     msg = "parse the file such that it can be used as a covariate file for PLINK or FaST-LMM"
-    parser_cmdl="/home/gwasuser/tools/cmdl_wrappers/parse_eigensoft_cmdl"
+    #parser_cmdl="/home/gwasuser/tools/cmdl_wrappers/parse_eigensoft_cmdl"
+    parser_cmdl="parse_eigensoft_cmdl"
     inFileEigenvec  = outEigensoft + ".eigenvecs.evec"
     inFileFam       = filteredGenotype + ".fam"
     outFileEigenvec = outEigensoft + ".eigenvec"
-    cmd = "python %s --eigenvec_file %s --fam %s --out %s" % \
+    cmd = "python %s --eigenvec_file %s --fam_file %s --out_file %s" % \
             (parser_cmdl,  inFileEigenvec, inFileFam, outFileEigenvec)
     execCommand (cmd, msg)
 
@@ -187,7 +185,7 @@ def calculatePCs (filteredGenotype, MAXPCS):
 def preprocessGenotype (binaryGenotype):
     msg = "Script to run data preprocessing with PLINK"
     filteredGenotype = binaryGenotype + "_filtered"
-    cmm = "plink --bfile %s --out %s --make-bed --hwe 1e-100 --maf 0.01 --mind 0.1 --geno 0.1" % (binaryGenotype, filteredGenotype)
+    cmm = "plink  --bfile %s --out %s --make-bed --hwe 1e-100 --maf 0.01 --mind 0.1 --geno 0.1" % (binaryGenotype, filteredGenotype)
     execCommand (cmm, msg)
     return (filteredGenotype)
 
@@ -198,7 +196,7 @@ def encodeGenotypeToBinaryFormat (genotype):
     msg = "Script to run recoding from PLINK plain text to binary file format"
     inGenotype  = GENOTYPE.split (".")[0] 
     binaryGenotype = inGenotype + "_bin"
-    cmm = "plink --file %s --make-bed --out %s" % (inGenotype, binaryGenotype)
+    cmm = "plink  --file %s --make-bed --out %s" % (inGenotype, binaryGenotype)
     execCommand (cmm, msg)
     return (inGenotype, binaryGenotype)
 
