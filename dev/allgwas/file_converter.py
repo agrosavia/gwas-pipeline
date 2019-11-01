@@ -124,7 +124,6 @@ def parse_eigensoft_eigenvectors(eigensoft_file, fam_file, output_file):
         next(fin)
         for line in fin:
             parts = line.strip().split()
-            print (">>>>", parts)
             fout.write("%s\t%s\n" % (id_dict[int(parts[0])], '\t'.join(parts[:-1])))
     fout.close()
 
