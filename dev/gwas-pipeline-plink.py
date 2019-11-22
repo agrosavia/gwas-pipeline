@@ -11,7 +11,9 @@ args = sys.argv
 
 #args = ["","atwell2010_geno.ped", "atwell2010_geno.map", "atwell2010_ftfield.txt", "out"]
 #args = ["","plink.tped", "plink.tfam", "atwell2010_ftfield.txt", "out"]
-args = ["","genotype-diplo-plink.tped", "genotype-diplo-plink.tfam", "phenotype-plink.tbl", "out"]
+#args = ["","genotype-diplo-plink.tped", "genotype-diplo-plink.tfam", "phenotype-plink-norm.tbl", "out"]
+
+args = ["","genotype-diplo-plink-AGs.ped","genotype-diplo-plink-AGs.map", "phenotype-plink-norm.tbl", "outAGs"]
 
 GENOTYPE  = args [1]
 SNPSMAP   = args [2]
@@ -63,8 +65,6 @@ def setPopulationStructure (filteredGenotype, MAXPCS):
     smallestInflation, outPCsPhenotype =  searchLeadingNumberOfPCs (filteredGenotype, PHENOTYPE, outFileEigenvec, MAXPCS, outEigensoft)
     print "\n>>>", smallestInflation, outPCsPhenotype
 
- 
-
 #----------------------------------------------------------
 # Enconding files from text to binary format
 #----------------------------------------------------------
@@ -72,7 +72,8 @@ def encodeGenotypeToBinaryFormat (genotype):
     msg = "Script to run recoding from PLINK plain text to binary file format"
     inGenotype  = GENOTYPE.split (".")[0] 
     binaryGenotype = inGenotype + "_bin"
-    cmm = "plink  --tfile %s --make-bed --out %s" % (inGenotype, binaryGenotype)
+    #cmm = "plink  --tfile %s --make-bed --out %s" % (inGenotype, binaryGenotype)
+    cmm = "plink  --file %s --make-bed --out %s" % (inGenotype, binaryGenotype)
     execCommand (cmm, msg)
     return (inGenotype, binaryGenotype)
 
@@ -127,7 +128,8 @@ def runUnivariateGWAS (filteredGenotype, PHENOTYPE):
     outGWAS      = "out_%s" % (PHENOTYPE)
 
     msg = "Univariate GWAS without population structure"
-    cmdStrPC2 = "plink  --bfile %s --pheno %s --out %s  --linear --allow-no-sex --adjust --covar structure-agro-plink.tbl" 
+    #cmdStrPC2 = "plink  --bfile %s --pheno %s --out %s  --linear --allow-no-sex --adjust --covar structure-agro-plink.tbl" 
+    cmdStrPC2 = "plink  --bfile %s --pheno %s --out %s  --linear --allow-no-sex --assoc --adjust"
     cmd = cmdStrPC2 % (filteredGenotype, inPhenotype, outGWAS)
 
     execCommand (cmd, msg)

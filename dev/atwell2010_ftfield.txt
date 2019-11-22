@@ -1,1 +1,0 @@
-/home/lg/agrosavia/projects/gwas-pipeline/dev/test-example/atwell2010_ftfield.txt

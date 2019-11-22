@@ -1,1 +1,0 @@
-/home/lg/downloads/gwas/gwas-soft/plink/smartpca.perl
